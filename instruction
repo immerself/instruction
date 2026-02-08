@@ -1,0 +1,38 @@
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state { established, related } accept
+        ct state invalid drop
+        iifname lo accept
+        ip protocol icmp accept
+        tcp dport 22 accept
+        iifname ens36 ip saddr 172.16.10.0/24 tcp dport 22 accept
+        iifname ens37 ip saddr 172.16.20.0/24 tcp dport 22 accept
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+        ct state { established, related } accept
+        ct state invalid drop
+        ip protocol icmp accept
+        iifname ens36 oifname ens33 accept
+        iifname ens33 oifname ens36 accept
+        iifname ens37 oifname ens33 accept
+        iifname ens33 oifname ens37 accept
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}
+
+table ip nat {
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        oifname ens33 masquerade
+    }
+
+    chain prerouting {
+        type nat hook prerouting priority -100; policy accept;
+    }
+}

@@ -1,0 +1,61 @@
+#for RTR-COD
+#!/usr/sbin/nft -f
+flush ruleset
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+        iifname lo accept
+        ip protocol icmp accept
+        ip6 nexthdr icmpv6 accept
+        iifname ens36 accept
+        tcp dport {22, 2222} accept
+        log prefix "nft-cod-inp-drop: " drop
+    }
+    chain forward {
+        type filter hook forward priority 0; policy accept;
+    }
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority -100; policy accept;
+    }
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        ip saddr 172.16.1.0/24 oifname ens33 masquerade
+    }
+}
+
+#for RTR-A
+#!/usr/sbin/nft -f
+flush ruleset
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+        iifname lo accept
+        ip protocol icmp accept
+        ip6 nexthdr icmpv6 accept
+        iifname ens36 accept
+        tcp dport {22, 2244} accept
+        log prefix "nft-a-inp-drop: " drop
+    }
+    chain forward {
+        type filter hook forward priority 0; policy accept;
+    }
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority -100; policy accept;
+    }
+    chain postrouting {
+        type nat hook postrouting priority 100; policy accept;
+        ip saddr 172.16.2.0/24 oifname ens33 masquerade
+    }
+}

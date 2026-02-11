@@ -1,0 +1,31 @@
+#ipsec.conf
+
+#for RTR-R
+conn vpn
+auto=start
+type=tunnel
+authby=secret
+right=5.5.5.100
+rightsubnet=0.0.0.0/0
+rightprotoport=gre
+left=4.4.4.100
+leftsubnet=0.0.0.0/0
+leftprotoport=gre
+ike=aes128-sha256-modp3072
+esp=aes128-sha256
+
+#for RTR-L
+conn vpn
+auto=start
+type=tunnel
+authby=secret
+right=4.4.4.100
+rightsubnet=0.0.0.0/0
+rightprotoport=gre
+left=5.5.5.100
+leftsubnet=0.0.0.0/0
+leftprotoport=gre
+ike=aes128-sha256-modp3072
+esp=aes128-sha256
+
+ipsec start --nofork --debug-all
